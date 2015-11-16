@@ -4,7 +4,7 @@ using System;
 using UnityEngine.UI;
 
 public class PlayerPlaneScript : MonoBehaviour {
-    public float speed = 50.0f;
+    public float speed = 60.0f;
     public float heading = 0.0f;
     public float pitch = 0.0f;
     public float headingMultiplier = 4.0f;
@@ -42,7 +42,6 @@ public class PlayerPlaneScript : MonoBehaviour {
 	void Update () {
         if (Input.GetKeyDown(KeyCode.Escape) == true)
         {
-            Debug.Log("Escape was pressed");
             Application.Quit();
         }
 		if (isMobile) {
@@ -75,7 +74,6 @@ public class PlayerPlaneScript : MonoBehaviour {
             bullet.gameObject.SetActive(true);
             bulletsLeft--;
             bulletsText.text = bulletsLeft.ToString();
-            Debug.Log("Fired !!!");
             Debug.Log(bullet.position);
         }
 
@@ -88,12 +86,10 @@ public class PlayerPlaneScript : MonoBehaviour {
         if (Input.GetMouseButton(0) == true && timeSinceFiring >= firingRate)
         {
             timeSinceFiring = 0.0f;
-            Debug.Log("Firing");
             isFiring = true;
         }
         else
         {
-            Debug.Log("Not Firing");
             isFiring = false;
         }
     }
