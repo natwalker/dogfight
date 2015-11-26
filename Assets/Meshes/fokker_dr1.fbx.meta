@@ -31,6 +31,8 @@ ModelImporter:
     4300002: Sphere.001
     4300004: propeller
     4300006: body
+    6400000: body
+    6400002: propeller
   materials:
     importMaterials: 1
     materialName: 0
@@ -56,7 +58,7 @@ ModelImporter:
     lODScreenPercentages: []
     globalScale: 1
     meshCompression: 0
-    addColliders: 0
+    addColliders: 1
     importBlendShapes: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
