@@ -17,6 +17,7 @@ public class CheckHitScript : MonoBehaviour {
     {
         if (coll.gameObject.tag == "CausesDamage")
         {
+            Debug.Log("Is Hit");
             plane.IsHit();
         }
     }

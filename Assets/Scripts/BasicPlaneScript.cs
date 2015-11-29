@@ -6,12 +6,13 @@ public abstract class BasicPlaneScript : MonoBehaviour {
     public float heading = 0.0f;
     public float speed = 50.0f;
     public float timeForCircle = 10.0f;
-    public int health = 100;
-    protected int bulletsLeft = 100;
+    public int health = 30;
+    public int bulletsLeft = 200;
     ParticleSystem smoke;
     // Use this for initialization
     public Transform bulletInst;
-    protected void Start () {
+    protected float frontOfPlane = 4.0f;
+    protected virtual void Start () {
         Debug.Log("In base Start");
         GameObject smokeObject = transform.Find("Smoke").gameObject;
         if (smokeObject != null)
@@ -39,7 +40,10 @@ public abstract class BasicPlaneScript : MonoBehaviour {
         transform.rotation = Quaternion.Euler(new Vector3(0.0f, heading, pitch * 180.0f));
         var newDirection = Quaternion.Euler(Mathf.Cos(heading * Mathf.PI / 180.0f), 0.0f, Mathf.Sin(heading * Mathf.PI / 180.0f));
         transform.position += transform.forward * Time.deltaTime * speed;
-        transform.position = new Vector3(transform.position.x, Terrain.activeTerrain.SampleHeight(transform.position) + 30.0f, transform.position.z);
+        float newY = Mathf.Lerp(transform.position.y, Terrain.activeTerrain.SampleHeight(transform.position) + 30.0f, Time.deltaTime * 5.0f);
+        if (newY < 30.0f)
+            newY = 30.0f;
+        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
 
     }
 
@@ -52,7 +56,7 @@ public abstract class BasicPlaneScript : MonoBehaviour {
         if (bulletsLeft > 0)
             bulletsLeft--;
         Transform bullet;
-        bullet = (Transform)Instantiate(bulletInst, transform.position + transform.forward * 10.0f, transform.rotation);
+        bullet = (Transform)Instantiate(bulletInst, transform.position + transform.forward * frontOfPlane * 1.5f, transform.rotation);
         bullet.gameObject.SetActive(true);
     }
 
@@ -68,8 +72,8 @@ public abstract class BasicPlaneScript : MonoBehaviour {
 
     public virtual void IsHit()
     {
-        Debug.Log("IsHit");
         health--;
+        Debug.Log("Health is now " + health.ToString());
         // TODO: add smoke.
         if (smoke != null)
         {

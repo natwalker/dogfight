@@ -19,9 +19,14 @@ public class PlayerPlaneScript : BasicPlaneScript
 
     private List<EnemyPlaneScript> _enemyPlanes = new List<EnemyPlaneScript>();
     public Slider bulletsScroller;
+    public Text healthText;
+
     // Use this for initialization
-    void Start()
+    protected override void Start()
     {
+        base.Start();
+        healthText.text = health.ToString();
+        frontOfPlane = 9.01f;
         Debug.Log("Script has started:" + gameObject.name);
         if (SystemInfo.deviceType == DeviceType.Handheld)
         {
@@ -120,4 +125,11 @@ public class PlayerPlaneScript : BasicPlaneScript
             plane.UnregisterPlayer(this);
         }
     }
+
+    public override void IsHit()
+    {
+        base.IsHit();
+        healthText.text = health.ToString();
+    }
+
 }
