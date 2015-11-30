@@ -9,7 +9,6 @@ public class BulletMoveScript : MonoBehaviour {
 	void Start () {
         Rigidbody rb = transform.gameObject.GetComponent<Rigidbody>();
         rb.velocity = (transform.forward * 200.0f);
-        Debug.Log("Forward is " + transform.forward.ToString());
 	}
 	
 	// Update is called once per frame

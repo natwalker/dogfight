@@ -12,20 +12,10 @@ public abstract class BasicPlaneScript : MonoBehaviour {
     // Use this for initialization
     public Transform bulletInst;
     protected float frontOfPlane = 4.0f;
-    protected virtual void Start () {
-        Debug.Log("In base Start");
-        GameObject smokeObject = transform.Find("Smoke").gameObject;
-        if (smokeObject != null)
-        {
-            Debug.Log("Stop smoke");
-            smoke = smokeObject.GetComponent<ParticleSystem>();
-            smoke.Stop();
-        }
-        else
-        {
-            Debug.Log("No smoke object found");
-        }
 
+    protected virtual void Start () {
+        GameObject smokeObject = transform.Find("Smoke").gameObject;
+        smoke = smokeObject.GetComponent<ParticleSystem>();
 	}
 
 
@@ -38,9 +28,10 @@ public abstract class BasicPlaneScript : MonoBehaviour {
         if (heading > 180.0f)
             heading -= 360.0f;
         transform.rotation = Quaternion.Euler(new Vector3(0.0f, heading, pitch * 180.0f));
-        var newDirection = Quaternion.Euler(Mathf.Cos(heading * Mathf.PI / 180.0f), 0.0f, Mathf.Sin(heading * Mathf.PI / 180.0f));
         transform.position += transform.forward * Time.deltaTime * speed;
-        float newY = Mathf.Lerp(transform.position.y, Terrain.activeTerrain.SampleHeight(transform.position) + 30.0f, Time.deltaTime * 5.0f);
+        float newY = Mathf.Lerp(transform.position.y, 
+                                Terrain.activeTerrain.SampleHeight(transform.position) + 30.0f, 
+                                Time.deltaTime * 5.0f);
         if (newY < 30.0f)
             newY = 30.0f;
         transform.position = new Vector3(transform.position.x, newY, transform.position.z);
@@ -56,7 +47,8 @@ public abstract class BasicPlaneScript : MonoBehaviour {
         if (bulletsLeft > 0)
             bulletsLeft--;
         Transform bullet;
-        bullet = (Transform)Instantiate(bulletInst, transform.position + transform.forward * frontOfPlane * 1.5f, transform.rotation);
+        bullet = (Transform)Instantiate(bulletInst, transform.position + transform.forward * frontOfPlane * 1.5f, 
+                                        transform.rotation);
         bullet.gameObject.SetActive(true);
     }
 
@@ -73,13 +65,12 @@ public abstract class BasicPlaneScript : MonoBehaviour {
     public virtual void IsHit()
     {
         health--;
-        Debug.Log("Health is now " + health.ToString());
         // TODO: add smoke.
         if (smoke != null)
         {
-            if (smoke.isStopped)
+            if (! smoke.isPlaying)
                 smoke.Play();
-            smoke.startSize = (110.0f - health) * 0.1f;
+            smoke.startSize = (35.0f - health) * 0.2f;
         }
     }
 }

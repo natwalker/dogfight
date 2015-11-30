@@ -8,7 +8,6 @@ public class PlayerPlaneScript : BasicPlaneScript
 {
     public float headingMultiplier = 4.0f;
     public float inputMultiplier = 0.02f;
-    private bool isFiring = false;
     private float timeSinceFiring = 100.0f;
 	private bool isMobile = false;
 	private Vector3 zeroAc;
@@ -18,16 +17,15 @@ public class PlayerPlaneScript : BasicPlaneScript
 	private float GetAxisH = 0;
 
     private List<EnemyPlaneScript> _enemyPlanes = new List<EnemyPlaneScript>();
+    public Slider healthText;
     public Slider bulletsScroller;
-    public Text healthText;
-
+  
     // Use this for initialization
     protected override void Start()
     {
         base.Start();
-        healthText.text = health.ToString();
+        healthText.value = health;
         frontOfPlane = 9.01f;
-        Debug.Log("Script has started:" + gameObject.name);
         if (SystemInfo.deviceType == DeviceType.Handheld)
         {
             isMobile = true;
@@ -129,7 +127,7 @@ public class PlayerPlaneScript : BasicPlaneScript
     public override void IsHit()
     {
         base.IsHit();
-        healthText.text = health.ToString();
+        healthText.value = health;
     }
 
 }

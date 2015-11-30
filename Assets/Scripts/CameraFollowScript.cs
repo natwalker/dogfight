@@ -21,7 +21,6 @@ public class CameraFollowScript : MonoBehaviour {
     }
 
     void LateUpdate () {
-        Vector3 forEuler = transform.eulerAngles;
         Vector3 behindPos = transform.position + new Vector3(0.0f, posUp, 0.0f) - transform.forward * posBack;
 
         float actualDamping = damping * 30.0f / (1 / Time.deltaTime);
