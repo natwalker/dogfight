@@ -36,8 +36,8 @@ public class PlayerPlaneScript : BasicPlaneScript
     //accelerometer
     void ResetAxes()
     {
-        zeroAc = Input.acceleration;
-        curAc = Vector3.zero;
+        zeroAc = Vector3.zero;
+		curAc = Vector3.zero;
     }
 
     // Update is called once per frame
@@ -49,7 +49,7 @@ public class PlayerPlaneScript : BasicPlaneScript
         }
         if (isMobile)
         {
-            curAc = Vector3.Lerp(curAc, Input.acceleration - zeroAc, Time.deltaTime / smooth);
+            curAc = Vector3.Lerp(curAc, Input.acceleration - zeroAc, Time.deltaTime / 0.25f);
             GetAxisH = Mathf.Clamp(-curAc.x * sensH, -0.5f, 0.5f);
             pitch = GetAxisH;
             Debug.Log("Mobile");
@@ -57,7 +57,7 @@ public class PlayerPlaneScript : BasicPlaneScript
         else
         {
             // Desktop
-            pitch -= Input.GetAxis("Horizontal") * inputMultiplier;
+            pitch -= Input.GetAxis("Horizontal") * Time.deltaTime;
             if (pitch < -0.5f)
                 pitch = -0.5f;
             if (pitch > 0.5f)

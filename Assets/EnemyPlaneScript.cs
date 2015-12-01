@@ -17,8 +17,17 @@ public class EnemyPlaneScript : BasicPlaneScript
     public GameObject guiCanvas;
     private Slider _healthBar;
     public enum EnemyPlaneState { STATE_PATROL, STATE_EVADE, STATE_ATTACK };
-    public EnemyPlaneState _state;
+	private EnemyPlaneState _state;
+	public EnemyPlaneState State{
+		get { return _state; }
+		set {
+			_state = value;
+			Debug.Log ("State is now" + value.ToString ());
+		}
+	}
     private float timeSinceSeeingPlayer;
+	public float _evadeHeadingDiff;
+	public float _evadeTime;
 
     void addWayPoint(float x, float y)
     {
@@ -72,14 +81,14 @@ public class EnemyPlaneScript : BasicPlaneScript
         if (diffAngle < -Mathf.PI)
             diffAngle += Mathf.PI * 2.0f;
         //Debug.Log("Curr " + currentAngle.ToString() + " req " + requiredAngle.ToString());
-        float reqPitch = Mathf.Clamp(2.0f * -diffAngle / Mathf.PI, -1.0f, 1.0f);
+        float reqPitch = Mathf.Clamp(2.0f * -diffAngle / Mathf.PI, -0.5f, 0.5f);
         //Debug.Log("Pitch " + pitch.ToString() + " Req " + reqPitch.ToString());
 
         if (reqPitch < (pitch - 5.0f * Time.deltaTime))
             pitch -= Time.deltaTime;
         if (reqPitch > (pitch + 5.0f * Time.deltaTime))
             pitch += Time.deltaTime;
-
+		pitch = Mathf.Clamp (pitch, -0.5f, 0.5f);
         float minDistance = 15.0f;
         float theDist = Mathf.Sqrt(((_wayPoints[_nextWayPoint].y - transform.position.z) * (_wayPoints[_nextWayPoint].y - transform.position.z)) +
                                    ((_wayPoints[_nextWayPoint].x - transform.position.x) * (_wayPoints[_nextWayPoint].x - transform.position.x)));
@@ -97,6 +106,23 @@ public class EnemyPlaneScript : BasicPlaneScript
 
     private void UpdateDirection_Evade()
     {
+		float diffAngle = _evadeHeadingDiff;
+		//Debug.Log("Curr " + currentAngle.ToString() + " req " + requiredAngle.ToString());
+		float reqPitch = Mathf.Clamp(1.0f * -diffAngle / Mathf.PI, -1.0f, 1.0f);
+		//Debug.Log("Pitch " + pitch.ToString() + " Req " + reqPitch.ToString());
+		
+		if (reqPitch < (pitch - 5.0f * Time.deltaTime))
+			pitch -= Time.deltaTime * 4.0f;
+		if (reqPitch > (pitch + 5.0f * Time.deltaTime))
+			pitch += Time.deltaTime * 4.0f;
+		pitch = Mathf.Clamp (pitch, -0.5f, 0.5f);
+		float prevDiff = _evadeHeadingDiff;
+//		_evadeHeadingDiff += (pitch * Time.deltaTime * 8.0f / timeForCircle);
+		_evadeTime -= Time.deltaTime;
+		if (Mathf.Sign (prevDiff) != Mathf.Sign (_evadeHeadingDiff) || _evadeTime <= 0.0f) 
+		{
+			State = EnemyPlaneState.STATE_PATROL;
+		}
 
     }
 
@@ -122,6 +148,8 @@ public class EnemyPlaneScript : BasicPlaneScript
             pitch -= Time.deltaTime * 5.0f;
         if (reqPitch > (pitch + 5.0f * Time.deltaTime))
             pitch += Time.deltaTime * 5.0f;
+		pitch = Mathf.Clamp (pitch, -0.5f,0.5f);
+
     }
 
     private bool _CanSeePlayer()
@@ -153,20 +181,18 @@ public class EnemyPlaneScript : BasicPlaneScript
         if (_CanSeePlayer())
         {
             timeSinceSeeingPlayer = 0.0f;
-            if (_state != EnemyPlaneState.STATE_ATTACK)
+            if (State != EnemyPlaneState.STATE_ATTACK)
             {
-                Debug.Log("Enemy is now ATTACKING");
-                _state = EnemyPlaneState.STATE_ATTACK;
+                State = EnemyPlaneState.STATE_ATTACK;
             }
         }
         else
         {
             timeSinceSeeingPlayer += Time.deltaTime;
-            if (timeSinceSeeingPlayer > 0.25f && _state != EnemyPlaneState.STATE_PATROL)
+            if (timeSinceSeeingPlayer > 0.5f && _state == EnemyPlaneState.STATE_ATTACK)
             {
-                Debug.Log("Enemy is now PATROLLING");
                 _CheckNextWayPoint();
-                _state = EnemyPlaneState.STATE_PATROL;
+                State = EnemyPlaneState.STATE_PATROL;
             }
         }
 
@@ -244,9 +270,26 @@ public class EnemyPlaneScript : BasicPlaneScript
         }
     }
 
+	private void _SetEvadeBearing()
+	{
+		if (UnityEngine.Random.Range(-1.0f, 1.0f) < 0.0f)
+		{
+			_evadeHeadingDiff = 270.0f * Mathf.Deg2Rad;
+		}
+		else
+		{
+			_evadeHeadingDiff = -270.0f * Mathf.Deg2Rad;
+		}
+		_evadeTime = 1.5f;
+	}
+
     override public void IsHit()
     {
         base.IsHit();
+		if (_state == EnemyPlaneState.STATE_PATROL) {
+			State = EnemyPlaneState.STATE_EVADE;
+			_SetEvadeBearing();
+		}
         _healthBar.value = health;
     }
 }
