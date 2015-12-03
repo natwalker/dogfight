@@ -3,6 +3,8 @@ using System.Collections;
 using System;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Linq;
+
 
 public class PlayerPlaneScript : BasicPlaneScript
 {
@@ -13,24 +15,31 @@ public class PlayerPlaneScript : BasicPlaneScript
 	private Vector3 zeroAc;
 	private Vector3 curAc;
 	private float sensH = 1;
-	private float smooth = 0.75f;
 	private float GetAxisH = 0;
-
+	private int _score = 0;
+	private int _numPlanes = 0;
+	public Text scoreText;
     private List<EnemyPlaneScript> _enemyPlanes = new List<EnemyPlaneScript>();
-    public Slider healthText;
+    public Slider _healthBar;
     public Slider bulletsScroller;
-  
+	public Image _healthFill;
+	public Text gameOver;
+
     // Use this for initialization
     protected override void Start()
     {
         base.Start();
-        healthText.value = health;
-        frontOfPlane = 9.01f;
+        _healthBar.value = health;
+		_healthFill = _healthBar.GetComponentsInChildren<UnityEngine.UI.Image>()
+			.FirstOrDefault(t => t.name == "Fill");
+		frontOfPlane = 9.01f;
         if (SystemInfo.deviceType == DeviceType.Handheld)
         {
             isMobile = true;
             ResetAxes();
         }
+		_numPlanes = _enemyPlanes.Count;
+		scoreText.text = _score.ToString () + " / " + _numPlanes.ToString ();
     }
 
     //accelerometer
@@ -102,7 +111,7 @@ public class PlayerPlaneScript : BasicPlaneScript
         }
     }
 
-    public void removeEnemy(EnemyPlaneScript anEnemy)
+    public void removeEnemy(EnemyPlaneScript anEnemy, bool hasDied)
     {
         if (_enemyPlanes.Contains(anEnemy))
         {
@@ -113,11 +122,27 @@ public class PlayerPlaneScript : BasicPlaneScript
         {
             Debug.Log("Attempting to remove non-existing enemy");
         }
+		if (hasDied) {
+			_score++;
+			scoreText.text = _score.ToString () + " / " + _numPlanes.ToString ();
+			if (_score == _numPlanes)
+			{
+				gameOver.text = "Game Over\nYou Win!";
+				gameOver.gameObject.SetActive(true);
+			}
+		}
     }
 
     public void OnDestroy()
     {
         Debug.Log("Destroying plane with enemies: " + _enemyPlanes.Count.ToString());
+		if (_enemyPlanes.Count () > 0) {
+			GetComponent<CameraFollowScript>().enabled = false;
+			_enemyPlanes [0].transform.GetComponent<CameraFollowScript> ().enabled = true;
+			gameOver.text = "Game Over\nYou Lose!";
+			gameOver.gameObject.SetActive(true);
+
+		}
         foreach (EnemyPlaneScript plane in _enemyPlanes)
         {
             plane.UnregisterPlayer(this);
@@ -127,7 +152,22 @@ public class PlayerPlaneScript : BasicPlaneScript
     public override void IsHit()
     {
         base.IsHit();
-        healthText.value = health;
-    }
+        _healthBar.value = health;
+		if (_healthBar.value < 2.0f * _healthBar.maxValue / 3.0f) {
+			if (_healthBar.value < _healthBar.maxValue / 3.0f) {
+				_healthFill.color = new Color(1.0f, 0.0f, 0.0f);
+			}
+			else {
+				_healthFill.color = new Color(1.0f, 1.0f, 0.0f);
+			}
+		}
+		if (health == 0) {
+			Destroy (gameObject);
+			GameObject theExplosion = Instantiate(explodeInst, transform.position, transform.rotation) as GameObject;
+			smoke.transform.SetParent(theExplosion.transform);
+			smoke.loop = false;
+			theExplosion.SetActive(true);
+		}
+	}
 
 }

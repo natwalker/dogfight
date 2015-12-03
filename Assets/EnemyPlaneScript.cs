@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.Linq;
 
 public class EnemyPlaneScript : BasicPlaneScript
 {
@@ -28,6 +29,7 @@ public class EnemyPlaneScript : BasicPlaneScript
     private float timeSinceSeeingPlayer;
 	public float _evadeHeadingDiff;
 	public float _evadeTime;
+	public Image _healthFill;
 
     void addWayPoint(float x, float y)
     {
@@ -39,11 +41,14 @@ public class EnemyPlaneScript : BasicPlaneScript
     // Use this for initialization
     protected new void Start()
     {
+		guiCanvas = GameObject.Find ("HUD");
         base.Start();
         _state = EnemyPlaneState.STATE_PATROL;
         _healthBar = transform.Find("Health").GetComponent<Slider>();
         _healthBar.transform.SetParent(guiCanvas.transform);
-        //TODO: Find front of colliders
+		_healthFill = _healthBar.GetComponentsInChildren<UnityEngine.UI.Image>()
+			.FirstOrDefault(t => t.name == "Fill");
+		//TODO: Find front of colliders
         frontOfPlane = 9.76f;
         //TODO: Read the waypoints and start position from a file or the scene.
         _wayPoints = new List<Vector2>();
@@ -155,7 +160,8 @@ public class EnemyPlaneScript : BasicPlaneScript
     private bool _CanSeePlayer()
     {
         bool result = false;
-
+		if (_playerPlane == null)
+			return false;
         float angle = Mathf.Atan2(_player.transform.position.x - transform.position.x, _player.transform.position.z - transform.position.z);
         float diffAngle = angle - heading * Mathf.Deg2Rad;
         if (diffAngle < -Mathf.PI)
@@ -259,15 +265,19 @@ public class EnemyPlaneScript : BasicPlaneScript
     public void UnregisterPlayer(PlayerPlaneScript thePlayer)
     {
         _playerPlane = null;
+		Destroy (_arrow);
+		_state = EnemyPlaneState.STATE_PATROL;
     }
 
     public void OnDestroy()
     {
         if (_playerPlane != null)
         {
-            _playerPlane.removeEnemy(this);
+            _playerPlane.removeEnemy(this, health == 0);
             Destroy(_arrow);
         }
+		_healthBar.transform.SetParent (transform); // to make sure it is destroyed
+		Destroy(_healthBar.gameObject);
     }
 
 	private void _SetEvadeBearing()
@@ -291,6 +301,21 @@ public class EnemyPlaneScript : BasicPlaneScript
 			_SetEvadeBearing();
 		}
         _healthBar.value = health;
+		if (_healthBar.value < 2.0f * _healthBar.maxValue / 3.0f) {
+			if (_healthBar.value < _healthBar.maxValue / 3.0f) {
+				_healthFill.color = new Color(1.0f, 0.0f, 0.0f, 0.7f);
+			}
+			else {
+				_healthFill.color = new Color(1.0f, 1.0f, 0.0f, 0.7f);
+			}
+		}
+		if (health == 0) {
+			Destroy (gameObject);
+			GameObject theExplosion = Instantiate(explodeInst, transform.position, transform.rotation) as GameObject;
+			smoke.transform.SetParent(theExplosion.transform);
+			smoke.loop = false;
+			theExplosion.SetActive(true);
+		}
     }
 }
 

@@ -21,4 +21,12 @@ public class CheckHitScript : MonoBehaviour {
             plane.IsHit();
         }
     }
+
+	void OnCollisionEnter(Collision coll)
+	{
+		if (coll.collider.gameObject.tag == "CausesDamage") {
+			Debug.Log ("Is Hit too");
+			plane.IsHit ();
+		}
+	}
 }

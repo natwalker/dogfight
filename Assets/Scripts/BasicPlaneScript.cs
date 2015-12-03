@@ -8,10 +8,11 @@ public abstract class BasicPlaneScript : MonoBehaviour {
     public float timeForCircle = 10.0f;
     public int health = 30;
     public int bulletsLeft = 200;
-    ParticleSystem smoke;
+    protected ParticleSystem smoke;
     // Use this for initialization
     public Transform bulletInst;
     protected float frontOfPlane = 4.0f;
+	public GameObject explodeInst;
 
     protected virtual void Start () {
         GameObject smokeObject = transform.Find("Smoke").gameObject;
@@ -72,5 +73,6 @@ public abstract class BasicPlaneScript : MonoBehaviour {
                 smoke.Play();
             smoke.startSize = (35.0f - health) * 0.2f;
         }
+
     }
 }
