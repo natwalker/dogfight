@@ -139,9 +139,11 @@ public class PlayerPlaneScript : BasicPlaneScript
 		if (_enemyPlanes.Count () > 0) {
 			GetComponent<CameraFollowScript>().enabled = false;
 			_enemyPlanes [0].transform.GetComponent<CameraFollowScript> ().enabled = true;
-			gameOver.text = "Game Over\nYou Lose!";
-			gameOver.gameObject.SetActive(true);
-
+			if (gameOver != null)
+			{
+				gameOver.text = "Game Over\nYou Lose!";
+				gameOver.gameObject.SetActive(true);
+			}
 		}
         foreach (EnemyPlaneScript plane in _enemyPlanes)
         {

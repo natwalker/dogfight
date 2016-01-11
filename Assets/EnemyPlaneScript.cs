@@ -276,8 +276,10 @@ public class EnemyPlaneScript : BasicPlaneScript
             _playerPlane.removeEnemy(this, health == 0);
             Destroy(_arrow);
         }
-		_healthBar.transform.SetParent (transform); // to make sure it is destroyed
-		Destroy(_healthBar.gameObject);
+		if (_healthBar != null) {
+			_healthBar.transform.SetParent (transform); // to make sure it is destroyed
+			Destroy(_healthBar.gameObject);
+		}
     }
 
 	private void _SetEvadeBearing()
@@ -310,11 +312,16 @@ public class EnemyPlaneScript : BasicPlaneScript
 			}
 		}
 		if (health == 0) {
-			Destroy (gameObject);
 			GameObject theExplosion = Instantiate(explodeInst, transform.position, transform.rotation) as GameObject;
-			smoke.transform.SetParent(theExplosion.transform);
+			smoke.transform.SetParent(theExplosion.transform, false);
 			smoke.loop = false;
 			theExplosion.SetActive(true);
+			Transform thePlane = transform.Find ("sopwith_camel");
+			thePlane.SetParent(theExplosion.transform, false);
+			thePlane.localPosition = Vector3.zero;
+			thePlane.localRotation = Quaternion.identity;
+			Debug.Log("Position is now " + thePlane.transform.localPosition.ToString());
+			Destroy (gameObject);
 		}
     }
 }
