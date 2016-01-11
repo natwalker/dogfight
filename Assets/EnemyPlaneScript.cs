@@ -10,6 +10,7 @@ public class EnemyPlaneScript : BasicPlaneScript
     private GameObject _player = null;
     private PlayerPlaneScript _playerPlane = null;
     private GameObject _arrow = null;
+    public Transform model = null;
     private float _arrowDistance = 30.0f;
     private float timeSinceFiring = 100.0f;
 
@@ -30,6 +31,7 @@ public class EnemyPlaneScript : BasicPlaneScript
 	public float _evadeHeadingDiff;
 	public float _evadeTime;
 	public Image _healthFill;
+    public Transform modelPrefab;
 
     void addWayPoint(float x, float y)
     {
@@ -41,6 +43,8 @@ public class EnemyPlaneScript : BasicPlaneScript
     // Use this for initialization
     protected new void Start()
     {
+        model = Instantiate(modelPrefab, transform.position, transform.rotation) as Transform;
+        model.SetParent(transform, true);
 		guiCanvas = GameObject.Find ("HUD");
         base.Start();
         _state = EnemyPlaneState.STATE_PATROL;
@@ -313,14 +317,21 @@ public class EnemyPlaneScript : BasicPlaneScript
 		}
 		if (health == 0) {
 			GameObject theExplosion = Instantiate(explodeInst, transform.position, transform.rotation) as GameObject;
-			smoke.transform.SetParent(theExplosion.transform, false);
-			smoke.loop = false;
+            Rigidbody rb = theExplosion.GetComponent<Rigidbody>();
+            rb.velocity = transform.forward * speed;
+            smoke.transform.SetParent(theExplosion.transform, false);
+			//smoke.loop = false;
 			theExplosion.SetActive(true);
-			Transform thePlane = transform.Find ("sopwith_camel");
-			thePlane.SetParent(theExplosion.transform, false);
-			thePlane.localPosition = Vector3.zero;
-			thePlane.localRotation = Quaternion.identity;
-			Debug.Log("Position is now " + thePlane.transform.localPosition.ToString());
+            if (pitch < 0)
+            {
+                rb.AddRelativeTorque( new Vector3(0, 0, -180.0f));
+            }
+            else
+            {
+                rb.AddRelativeTorque( new Vector3(0, 0, 180.0f));
+            }
+            Transform modelMesh = model.FindChild("Mesh");
+            modelMesh.SetParent(theExplosion.transform, false);
 			Destroy (gameObject);
 		}
     }

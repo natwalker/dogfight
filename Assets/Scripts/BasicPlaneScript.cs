@@ -75,4 +75,22 @@ public abstract class BasicPlaneScript : MonoBehaviour {
         }
 
     }
+
+    void OnTriggerEnter(Collider coll)
+    {
+        if (coll.gameObject.tag == "CausesDamage")
+        {
+            Debug.Log("Is Hit");
+            IsHit();
+        }
+    }
+
+    void OnCollisionEnter(Collision coll)
+    {
+        if (coll.collider.gameObject.tag == "CausesDamage")
+        {
+            Debug.Log("Is Hit too");
+            IsHit();
+        }
+    }
 }

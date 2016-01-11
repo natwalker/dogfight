@@ -6,19 +6,24 @@ public class CrashingScript : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		rb = gameObject.GetComponent<Rigidbody> ();
-		Debug.Log ("RB velocity = " + rb.velocity.ToString ());
-		Transform thePlane = transform.Find ("sopwith_camel");
-		thePlane.position = Vector3.zero;
+        Debug.Log ("RB velocity = " + rb.velocity.ToString () + " " + transform.forward.ToString());
+		Transform thePlane = transform.Find ("Mesh");
 		Destroy(thePlane.GetComponent<Rigidbody>());
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		Debug.Log (transform.Find ("sopwith_camel").position.ToString ());
 	}
 
-	void UpdateFixed() {
-		rb.AddForce (new Vector3( 0.0f, 9.6f, 0.0f));
+	void FixedUpdate() {
+        //rb.AddForce (new Vector3( 0.0f, 9.6f * Time.deltaTime, 0.0f) + transform.forward * Time.deltaTime );
+        Debug.Log(transform.position.ToString());
+        if (transform.position.y <= 0.0f || Terrain.activeTerrain.SampleHeight(transform.position) >= transform.position.y)
+        {
+            rb.useGravity = false;
+            rb.velocity = Vector3.zero;
+            rb.isKinematic = true;
+        }
 	}
 	
 }
